@@ -3,15 +3,39 @@
 version: '3.4'
 
 services:
-  vvjsimpledomainapi:
-    image: vvjsimpledomainapi
-    build:
-      context: ../
-      dockerfile: src/VVJ.SimpleDomain.Api/Dockerfile
+  # vvjsimpledomainapi:
+  #   image: vvjsimpledomainapi
+  #   container_name: vvj-simpledomain-api
+  #   build:
+  #     context: ../
+  #     dockerfile: src/VVJ.SimpleDomain.Api/Dockerfile
+  #   ports:
+  #     - 80:80
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ASPNETCORE_URLS=http://+:80
+  #   volumes:
+  #     - ~/.vsdbg:/remote_debugger:rw
+  localstack:
+    image: localstack/localstack
+    container_name: vvj-simpledomain-localstack
     ports:
-      - 80:80
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:80
+      - 4566:4566
+    environment: 
+      SERVICES: sqs,sns
+      DEFAULT_REGION: us-west-1
+    # depends_on: 
+    #   - vvjsimpledomainapi
+  terraform:
+    image: hashicorp/terraform
+    container_name: vvj-simpledomain-terraform
     volumes:
-      - ~/.vsdbg:/remote_debugger:rw
+      - ../tf/localstack:/tf/localstack:ro
+    entrypoint: [
+      "sh",
+      "-c",
+      "cp -r /tf/ /xrun/ && ls /xrun/localstack/ && cd /xrun/localstack && terraform init && terraform apply -auto-approve"
+    ]
+    depends_on: 
+      - localstack
+
