@@ -4,7 +4,7 @@ version: '3.4'
 
 services:
   vvj-simpledomain-api:
-    image: vvjsimpledomainapi
+    image: simple-domain/api:latest
     build:
       context: ../
       dockerfile: src/VVJ.SimpleDomain.Api/Dockerfile
